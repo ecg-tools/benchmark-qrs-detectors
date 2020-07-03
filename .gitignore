@@ -1,0 +1,5 @@
+.idea/
+data/
+__pycache__/
+output/
+dossier_cache/
