@@ -11,7 +11,7 @@ correction output/annotations/${DATASET}.json:
 	@python get_annotations.py --data ${DATASET}
 
 viz:
-	@python streamlit run dashboard.py
+	@streamlit run dashboard.py
 
 help:
 	@echo DATASET : string - dataset to choose among this list ['mit-bih-arrhythmia', 'mit-bih-noise-stress-test-e24',
