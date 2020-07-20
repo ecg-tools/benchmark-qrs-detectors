@@ -29,7 +29,7 @@ def print_error_no_evaluation(ds='"#check --help#"', alg='"#check --help#"', t='
     st.write(f'\t make evaluation --DATASET="{ds}" --ALGO="{alg}" --TOLERANCE={t}')
 
 
-datasets_list = ['mit-bih-arrhythmia', 'european-stt', 'mit-bih-supraventricular-arrhythmia', 'mit-bih-long-term-ecg']
+datasets_list = ['mit-bih-arrhythmia', 'mit-bih-supraventricular-arrhythmia', 'mit-bih-long-term-ecg', 'european-stt']
 
 colormap = {
     'Pan-Tompkins-ecg-detector': ['red', 'circle'],
