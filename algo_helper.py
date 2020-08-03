@@ -5,6 +5,9 @@ import mne.preprocessing.ecg as mne_ecg
 import heartpy.peakdetection as hp_pkdetection
 from heartpy.datautils import rolling_mean, _sliding_window
 from wfdb import processing
+import typing
+import numpy
+from typing import  List, Dict, Tuple
 
 # list all algorithms
 algorithms_list = ['Pan-Tompkins-ecg-detector', 'Hamilton-ecg-detector', 'Christov-ecg-detector',
@@ -14,7 +17,7 @@ algorithms_list = ['Pan-Tompkins-ecg-detector', 'Hamilton-ecg-detector', 'Christ
 
 
 # perform detection
-def run_algo(algorithm, signal, freq_sampling):
+def run_algo(algorithm: str, signal: numpy.ndarray, freq_sampling: int) -> List[int]:
     detectors = Detectors(freq_sampling)
     if algorithm == 'Pan-Tompkins-ecg-detector':
         qrs_detections = detectors.pan_tompkins_detector(signal)

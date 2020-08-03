@@ -6,7 +6,7 @@ from algo_helper import *
 
 
 # write json file
-def write_detections_json(dataset, algorithm, dict_detections):
+def write_detections_json(dataset: str, algorithm: str, dict_detections: Dict[str, Dict[str, List[int]]]) -> None:
     os.makedirs(f'output/frames', exist_ok=True)
     with open(f'output/frames/{algorithm}_{dataset}.json', 'w') as outfile:
         json.dump(dict_detections, outfile)
@@ -16,7 +16,7 @@ def write_detections_json(dataset, algorithm, dict_detections):
 @click.command()
 @click.option('--data', required=True, type=click.Choice(datasets_list, case_sensitive=False), help='dataset')
 @click.option('--algo', required=True, type=click.Choice(algorithms_list, case_sensitive=True), help='algorithm')
-def main(data, algo):
+def main(data: str, algo: str) -> None:
     dataset = data
     algorithm = algo
     data_generator = dataset_generators[dataset]

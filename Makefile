@@ -1,5 +1,4 @@
-
-.PHONY: detection correction evaluation clean help viz
+.PHONY: detection correction evaluation clean help
 
 evaluation: output/frames/${ALGO}_${DATASET}.json output/annotations/${DATASET}.json
 	@python get_perf.py --data ${DATASET} --algo ${ALGO} --tol ${TOLERANCE}

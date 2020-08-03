@@ -2,10 +2,12 @@ import streamlit as st
 import glob
 import plotly.graph_objects as go
 import matplotlib.pyplot as plt
+from statistics import mean
 import pandas as pd
 from math import nan
 import os
 import json
+import typing
 
 from dataset_helper import records, sampling_frequency
 from algo_helper import algorithms_list
@@ -15,7 +17,7 @@ from algo_helper import algorithms_list
 '''
 
 
-def get_layout(title):
+def get_layout(title: str):
     return go.Layout(title=title, margin=dict(l=20, r=20, t=30, b=20))
 
 
@@ -23,7 +25,7 @@ applications = ['Comparison of different algorithms', 'Evaluation of one algorit
 application = st.sidebar.selectbox('What would you like to study ?', applications)
 
 
-def print_error_no_evaluation(ds='"#check --help#"', alg='"#check --help#"', t='#int(ms)#'):
+def print_error_no_evaluation(ds: str = '"#check --help#"', alg: str = '"#check --help#"', t: str = '#int(ms)#') -> None:
     st.write('The evaluation of your interest has not already being performed. You probably did not execute the '
              'evaluation. Please compute the following command :')
     st.write(f'\t make evaluation --DATASET="{ds}" --ALGO="{alg}" --TOLERANCE={t}')
@@ -32,21 +34,21 @@ def print_error_no_evaluation(ds='"#check --help#"', alg='"#check --help#"', t='
 datasets_list = ['mit-bih-arrhythmia', 'mit-bih-supraventricular-arrhythmia', 'mit-bih-long-term-ecg', 'european-stt']
 
 colormap = {
-    'Pan-Tompkins-ecg-detector': ['red', 'circle'],
-    'Hamilton-ecg-detector': ['green', 'circle'],
-    'Christov-ecg-detector': ['blue', 'circle'],
-    'Engelse-Zeelenberg-ecg-detector': ['cyan', 'circle'],
-    'SWT-ecg-detector': ['magenta', 'circle'],
-    'Matched-filter-ecg-detector': ['yellow', 'circle'],
-    'Two-average-ecg-detector': ['black', 'circle'],
-    'Hamilton-biosppy': ['green', 'star-diamond'],
-    'Christov-biosppy': ['red', 'star-diamond'],
-    'Engelse-Zeelenberg-biosppy': ['blue', 'star-diamond'],
-    'Gamboa-biosppy': ['black', 'star-diamond'],
-    'mne-ecg': ['black', 'square-dot'],
-    'heartpy': ['cyan', 'x'],
-    'gqrs-wfdb': ['blue', 'star-triangle-up'],
-    'xqrs-wfdb': ['red', 'star-triangle-up']
+    'Pan-Tompkins-ecg-detector': 'rgb(41,58,143)',
+    'Hamilton-ecg-detector': 'rgb(215,48,39)',
+    'Christov-ecg-detector': 'rgb(26,152,80)',
+    'Engelse-Zeelenberg-ecg-detector': '#440154',
+    'SWT-ecg-detector': 'rgb(255,111,0)',
+    'Matched-filter-ecg-detector': 'rgb(179,88,6)',
+    'Two-average-ecg-detector': 'rgb(212,103,128)',
+    'Hamilton-biosppy': 'rgb(184,225,134)',
+    'Christov-biosppy': 'rgb(255,234,0)',
+    'Engelse-Zeelenberg-biosppy': 'rgb(197,27,125)',
+    'Gamboa-biosppy': 'rgb(153,204,255)',
+    'mne-ecg': 'rgb(61,89,65)',
+    'heartpy': 'rgb(44,255,150)',
+    'gqrs-wfdb': 'rgb(254,224,139)',
+    'xqrs-wfdb': 'rgb(10,136,186)'
 }
 
 if application == 'Comparison of different algorithms':
@@ -166,7 +168,8 @@ if application == 'Comparison of different algorithms':
             if not os.path.exists(f'output/perf/Engelse-Zeelenberg-biosppy_{dataset}_{tolerance}.csv'):
                 print_error_no_evaluation(ds=dataset, alg='Engelse-Zeelenberg-biosppy', t=tolerance)
             else:
-                results_df = pd.read_csv(f'output/perf/Engelse-Zeelenberg-biosppy_{dataset}_{tolerance}.csv', delimiter=',',
+                results_df = pd.read_csv(f'output/perf/Engelse-Zeelenberg-biosppy_{dataset}_{tolerance}.csv',
+                                         delimiter=',',
                                          index_col=0)
                 global_eval = results_df.iloc[-1, 1:]
                 global_eval.name = 'Engelse-Zeelenberg-biosppy'
@@ -229,40 +232,60 @@ if application == 'Comparison of different algorithms':
         '''
         ## Comparison of performances of algorithms on different datasets
         '''
-        tol = 50
         results_F1 = pd.DataFrame(columns=datasets_list, index=algorithms_list)
         results_Fp = pd.DataFrame(columns=datasets_list, index=algorithms_list)
         for algo in algorithms_list:
             for dataset in datasets_list:
-                if os.path.exists(f'output/perf/{algo}_{dataset}_50.csv'):
-                    results_df = pd.read_csv(f'output/perf/{algo}_{dataset}_50.csv', delimiter=',')
+                if os.path.exists(f'output/perf/{algo}_{dataset}_{tolerance}.csv'):
+                    results_df = pd.read_csv(f'output/perf/{algo}_{dataset}_{tolerance}.csv', delimiter=',')
                     results_F1.loc[algo, dataset] = results_df.iloc[-1, -1]
                     results_Fp.loc[algo, dataset] = results_df.iloc[-1, 5]
                 else:
                     results_F1.loc[algo, dataset] = nan
                     results_Fp.loc[algo, dataset] = nan
-        fig_F1 = go.Figure(layout=get_layout('F1 score of every algorithms for each dataset (tolerance=50ms)'))
-        fig_Fp = go.Figure(layout=get_layout('Rate of detection failure of every algorithms for each dataset '
-                                             '(tolerance=50ms)'))
+        fig_F1 = go.Figure(
+            layout=get_layout(f'F1 score of every algorithms for each dataset (tolerance={tolerance}ms)'))
+        fig_Fp = go.Figure(layout=get_layout(f'Rate of detection failure of every algorithms for each dataset '
+                                             f'(tolerance={tolerance}ms)'))
+        dict_algo_F1 = {}
+        dict_algo_Fp = {}
         for algo in algorithms_list:
+            F1_series_algo = list(results_F1.loc[algo, :].dropna().astype(float))
+            mean_F1 = mean(F1_series_algo)
+            dict_algo_F1[algo] = mean_F1
+            Fp_series_algo = list(results_Fp.loc[algo, :].dropna().astype(float))
+            mean_Fp = mean(Fp_series_algo)
+            dict_algo_Fp[algo] = mean_Fp
+
+        dict_meanF1_sorted = dict(sorted(dict_algo_F1.items(), key=lambda t: t[1]))
+        dict_meanFp_sorted = dict(sorted(dict_algo_Fp.items(), key=lambda t: t[1]))
+
+        for algo in dict_meanF1_sorted.keys():
             F1_algo = results_F1.loc[algo, :]
-            Fp_algo = results_Fp.loc[algo, :]
-            fig_F1.add_trace(go.Scatter(x=datasets_list,
-                                        y=F1_algo,
-                                        mode='lines+markers',
-                                        marker=dict(size=10, color=colormap[algo][0], symbol=colormap[algo][1]),
-                                        name=algo))
-            fig_Fp.add_trace(go.Scatter(x=datasets_list,
-                                        y=Fp_algo,
-                                        mode='lines+markers',
-                                        marker=dict(size=10, color=colormap[algo][0], symbol=colormap[algo][1]),
-                                        name=algo))
+            fig_F1.add_trace(go.Histogram(x=datasets_list,
+                                          y=F1_algo,
+                                          histfunc='sum',
+                                          marker=dict(color=colormap[algo]),
+                                          name=algo))
             fig_F1.update_layout(autosize=False,
                                  width=800,
                                  height=600)
+
+        for algo in dict_meanFp_sorted.keys():
+            Fp_algo = results_Fp.loc[algo, :]
+            fig_Fp.add_trace(go.Histogram(x=datasets_list,
+                                          y=Fp_algo,
+                                          histfunc='sum',
+                                          marker=dict(color=colormap[algo]),
+                                          name=algo))
             fig_Fp.update_layout(autosize=False,
                                  width=800,
                                  height=600)
+        fig_Fp.add_trace(go.Scatter(x=datasets_list,
+                                    y=[10, 10, 10, 10],
+                                    mode='lines',
+                                    line=dict(width=3, color='black', dash='dot'),
+                                    name='10% : 1 error (FN or FP) for 10 peaks to detect'))
         st.plotly_chart(fig_F1)
         st.plotly_chart(fig_Fp)
 
@@ -346,35 +369,35 @@ elif application == 'Noise robustness':
     st.write(comparison_df_118)
     st.write(comparison_df_119)
 
-    tol = 50
     SNR_list = ['_6', '00', '06', '12', '18', '24']
     results_F1 = pd.DataFrame(columns=SNR_list, index=algorithms_list)
     results_Fp = pd.DataFrame(columns=SNR_list, index=algorithms_list)
     for algo in algorithms_list:
         for snr in SNR_list:
             dataset = f"mit-bih-noise-stress-test-e{snr}"
-            if os.path.exists(f'output/perf/{algo}_{dataset}_50.csv'):
-                results_df = pd.read_csv(f'output/perf/{algo}_{dataset}_50.csv', delimiter=',')
+            if os.path.exists(f'output/perf/{algo}_{dataset}_{tolerance}.csv'):
+                results_df = pd.read_csv(f'output/perf/{algo}_{dataset}_{tolerance}.csv', delimiter=',')
                 results_F1.loc[algo, snr] = results_df.iloc[-1, -1]
                 results_Fp.loc[algo, snr] = results_df.iloc[-1, 5]
             else:
                 results_F1.loc[algo, snr] = nan
                 results_Fp.loc[algo, snr] = nan
-    fig_F1 = go.Figure(layout=get_layout('F1 score of every algorithms for each value of SNR (tolerance=50ms)'))
-    fig_Fp = go.Figure(layout=get_layout('Rate of detection failure of every algorithms for each value of SNR'
-                                         '(tolerance=50ms)'))
+    fig_F1 = go.Figure(layout=get_layout(f'F1 score of every algorithms for each value of SNR '
+                                         f'(tolerance={tolerance}ms)'))
+    fig_Fp = go.Figure(layout=get_layout(f'Rate of detection failure of every algorithms for each value of SNR'
+                                         f'(tolerance={tolerance}ms)'))
     for algo in algorithms_list:
         F1_algo = results_F1.loc[algo, :]
         Fp_algo = results_Fp.loc[algo, :]
         fig_F1.add_trace(go.Scatter(x=SNR_list,
                                     y=F1_algo,
                                     mode='lines+markers',
-                                    marker=dict(size=10, color=colormap[algo][0], symbol=colormap[algo][1]),
+                                    marker=dict(size=10, color=colormap[algo]),
                                     name=algo))
         fig_Fp.add_trace(go.Scatter(x=SNR_list,
                                     y=Fp_algo,
                                     mode='lines+markers',
-                                    marker=dict(size=10, color=colormap[algo][0], symbol=colormap[algo][1]),
+                                    marker=dict(size=10, color=colormap[algo]),
                                     name=algo))
         fig_F1.update_layout(autosize=False,
                              xaxis_type='category',

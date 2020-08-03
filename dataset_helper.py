@@ -1,6 +1,6 @@
 import wfdb
 import pandas as pd
-
+from typing import  Generator, Dict, Tuple
 data_path = 'data'
 
 # list all dataset
@@ -64,7 +64,7 @@ mit_bih_arrhythmia = {
 
 
 # load data
-def read_mit_bih_arrhythmia():
+def read_mit_bih_arrhythmia() -> Generator[Tuple[int, Dict], None, None]:
     records_list = pd.read_csv(f'{data_path}/mit-bih-arrhythmia-database/RECORDS', names=['id'])
     for record_id in records_list['id']:
         record = wfdb.rdrecord(f'{data_path}/mit-bih-arrhythmia-database/{record_id}')
@@ -108,7 +108,7 @@ mit_bih_noise_stress_test_e_6 = {
 
 
 # load data
-def read_mit_bih_noise_e24():
+def read_mit_bih_noise_e24() -> Generator[Tuple[int, Dict], None, None]:
     rec_list = pd.read_csv(f'{data_path}/mit-bih-noise-stress-test-database/RECORDS', names=['id'])
     records_list = [record_id for record_id in rec_list['id'] if record_id.find('e24') != -1]
     for record_id in records_list:
@@ -119,7 +119,7 @@ def read_mit_bih_noise_e24():
         }
 
 
-def read_mit_bih_noise_e18():
+def read_mit_bih_noise_e18() -> Generator[Tuple[int, Dict], None, None]:
     rec_list = pd.read_csv(f'{data_path}/mit-bih-noise-stress-test-database/RECORDS', names=['id'])
     records_list = [record_id for record_id in rec_list['id'] if record_id.find('e18') != -1]
     for record_id in records_list:
@@ -130,7 +130,7 @@ def read_mit_bih_noise_e18():
         }
 
 
-def read_mit_bih_noise_e12():
+def read_mit_bih_noise_e12() -> Generator[Tuple[int, Dict], None, None]:
     rec_list = pd.read_csv(f'{data_path}/mit-bih-noise-stress-test-database/RECORDS', names=['id'])
     records_list = [record_id for record_id in rec_list['id'] if record_id.find('e12') != -1]
     for record_id in records_list:
@@ -141,7 +141,7 @@ def read_mit_bih_noise_e12():
         }
 
 
-def read_mit_bih_noise_e06():
+def read_mit_bih_noise_e06() -> Generator[Tuple[int, Dict], None, None]:
     rec_list = pd.read_csv(f'{data_path}/mit-bih-noise-stress-test-database/RECORDS', names=['id'])
     records_list = [record_id for record_id in rec_list['id'] if record_id.find('e06') != -1]
     for record_id in records_list:
@@ -152,7 +152,7 @@ def read_mit_bih_noise_e06():
         }
 
 
-def read_mit_bih_noise_e00():
+def read_mit_bih_noise_e00() -> Generator[Tuple[int, Dict], None, None]:
     rec_list = pd.read_csv(f'{data_path}/mit-bih-noise-stress-test-database/RECORDS', names=['id'])
     records_list = [record_id for record_id in rec_list['id'] if record_id.find('e00') != -1]
     for record_id in records_list:
@@ -163,7 +163,7 @@ def read_mit_bih_noise_e00():
         }
 
 
-def read_mit_bih_noise_e_6():
+def read_mit_bih_noise_e_6() -> Generator[Tuple[int, Dict], None, None]:
     rec_list = pd.read_csv(f'{data_path}/mit-bih-noise-stress-test-database/RECORDS', names=['id'])
     records_list = [record_id for record_id in rec_list['id'] if record_id.find('e_6') != -1]
     for record_id in records_list:
@@ -271,7 +271,7 @@ european_stt = {
 
 
 # load data
-def read_european_stt():
+def read_european_stt() -> Generator[Tuple[int, Dict], None, None]:
     records_list = pd.read_csv(f'{data_path}/european-stt-database/RECORDS', names=['id'])
     for record_id in records_list['id']:
         record = wfdb.rdrecord(f'{data_path}/european-stt-database/{record_id}')
@@ -366,7 +366,7 @@ mit_bih_supraventricular_arrhythmia = {
 
 
 # load data
-def read_mit_bih_supraventricular_arrhythmia():
+def read_mit_bih_supraventricular_arrhythmia() -> Generator[Tuple[int, Dict], None, None]:
     records_list = pd.read_csv(f'{data_path}/mit-bih-supraventricular-arrhythmia-database/RECORDS', names=['id'])
     for record_id in records_list['id']:
         record = wfdb.rdrecord(f'{data_path}/mit-bih-supraventricular-arrhythmia-database/{record_id}')
@@ -390,7 +390,7 @@ mit_bih_long_term = {
 
 
 # load data
-def read_mit_bih_long_term():
+def read_mit_bih_long_term() -> Generator[Tuple[int, Dict], None, None]:
     records_list = pd.read_csv(f'{data_path}/mit-bih-long-term-ecg-database/RECORDS', names=['id'])
     for record_id in records_list['id']:
         record = wfdb.rdrecord(f'{data_path}/mit-bih-long-term-ecg-database/{record_id}')
@@ -400,7 +400,7 @@ def read_mit_bih_long_term():
         yield record_id, record_sigs
 
 
-# dictionary of methods
+# generator for reading records
 dataset_generators = {
     'mit-bih-arrhythmia': read_mit_bih_arrhythmia(),
     'mit-bih-noise-stress-test-e24': read_mit_bih_noise_e24(),
@@ -414,6 +414,7 @@ dataset_generators = {
     'mit-bih-long-term-ecg': read_mit_bih_long_term()
 }
 
+#generator for names of records and their channels
 records = {
     'mit-bih-arrhythmia': mit_bih_arrhythmia,
     'mit-bih-noise-stress-test-e24': mit_bih_noise_stress_test_e24,
@@ -427,6 +428,7 @@ records = {
     'mit-bih-long-term-ecg': mit_bih_long_term
 }
 
+#generator for value of sampling frequence
 sampling_frequency = {
     'mit-bih-arrhythmia': 360,
     'mit-bih-noise-stress-test-e24': 360,
