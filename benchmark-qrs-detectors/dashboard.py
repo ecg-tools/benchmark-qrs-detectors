@@ -1,3 +1,9 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+"""This script structures the dashboard streamlit in three applications. Its main role is to display results of
+evaluation which have already been performed. This module is independent from others.
+"""
+
 import streamlit as st
 import glob
 import plotly.graph_objects as go
@@ -7,7 +13,6 @@ import pandas as pd
 from math import nan
 import os
 import json
-import typing
 
 from dataset_helper import records, sampling_frequency
 from algo_helper import algorithms_list
@@ -17,22 +22,46 @@ from algo_helper import algorithms_list
 '''
 
 
-def get_layout(title: str):
+def get_layout(title: str) -> go.Layout:
+    """
+    use for displaying a graph. create a Layout object
+
+    :param title: title of the displayed graph
+    :type title: str
+    :return: model of layout for graphs
+    :rtype: Layout
+    """
     return go.Layout(title=title, margin=dict(l=20, r=20, t=30, b=20))
 
 
+# choose application of interest
 applications = ['Comparison of different algorithms', 'Evaluation of one algorithm', 'Noise robustness']
 application = st.sidebar.selectbox('What would you like to study ?', applications)
 
 
-def print_error_no_evaluation(ds: str = '"#check --help#"', alg: str = '"#check --help#"', t: str = '#int(ms)#') -> None:
+def print_error_no_evaluation(ds: str = '"#check --help#"', alg: str = '"#check --help#"', t: str = '#int(ms)#') \
+        -> None:
+    """
+    display an error message when a result of a specific evaluation is selected, whereas the latter was not been
+    performed. Display make command to run the evaluation of interest.
+
+    :param ds: name of the dataset of interest
+    :type ds: str
+    :param alg: name of the algorithm of interest
+    :type alg: str
+    :param t: tolerance's value of interest
+    :type t: str
+    """
     st.write('The evaluation of your interest has not already being performed. You probably did not execute the '
              'evaluation. Please compute the following command :')
     st.write(f'\t make evaluation --DATASET="{ds}" --ALGO="{alg}" --TOLERANCE={t}')
 
 
+# list of datasets used in the two first applications (comparison of performances on the entire datasets or on each
+# record)
 datasets_list = ['mit-bih-arrhythmia', 'mit-bih-supraventricular-arrhythmia', 'mit-bih-long-term-ecg', 'european-stt']
 
+# colors used for graphs for each algorithm
 colormap = {
     'Pan-Tompkins-ecg-detector': 'rgb(41,58,143)',
     'Hamilton-ecg-detector': 'rgb(215,48,39)',
@@ -51,6 +80,7 @@ colormap = {
     'xqrs-wfdb': 'rgb(10,136,186)'
 }
 
+# first application
 if application == 'Comparison of different algorithms':
     st.write('\n\n')
     '''
@@ -67,6 +97,7 @@ if application == 'Comparison of different algorithms':
     tolerance = st.selectbox('Please choose tolerance of the evaluation (in ms):', list(set(tolerance_list)))
     csv_files = [csv_file for csv_file in csv_files_dataset if csv_file[:-4].split('_')[-1] == tolerance]
 
+    # table of comparison
     if len(csv_files) == 0:
         print_error_no_evaluation(ds=dataset)
     else:
@@ -229,6 +260,7 @@ if application == 'Comparison of different algorithms':
         st.write(comparison_df)
         st.write(f'Total number of beats for this dataset is : {number_of_beats}')
 
+        # graphs of comparison
         '''
         ## Comparison of performances of algorithms on different datasets
         '''
@@ -290,6 +322,7 @@ if application == 'Comparison of different algorithms':
         st.plotly_chart(fig_Fp)
 
 
+# second application
 elif application == 'Evaluation of one algorithm':
     st.write('\n\n')
     '''
@@ -306,12 +339,14 @@ elif application == 'Evaluation of one algorithm':
     if len(csv_files) == 0 or len(json_files) == 0:
         print_error_no_evaluation(ds=dataset, alg=algorithm)
     else:
+        # tables of performances
         if st.checkbox("Display performances' scores"):
             for file in csv_files:
                 results_df = pd.read_csv(file, delimiter=',', index_col=0)
                 tolerance = file[:-4].split('_')[-1]
                 st.write(f"Evaluation's results for a tolerance of {tolerance} ms: ")
                 st.write(results_df)
+        # histograms of delays
         if st.checkbox("Display delays' plots"):
             freq_sampling = sampling_frequency[dataset]
             st.write(f'Signals of this dataset ({dataset}) was sampled at {freq_sampling}Hz. It means that 1 second of '
@@ -331,6 +366,7 @@ elif application == 'Evaluation of one algorithm':
                     plt.legend()
                     st.pyplot()
 
+# third application
 elif application == 'Noise robustness':
     st.write('\n\n')
     '''
@@ -355,6 +391,7 @@ elif application == 'Noise robustness':
              'Please compute the following command :')
     st.write(f'\t make evaluation --DATASET="mit-bih-noise-stress-test-e#SNR" --ALGO="{algorithm}" '
              f'--TOLERANCE={tolerance}')
+    # tables of performances
     comparison_df_118 = pd.DataFrame(columns=['nbofbeats', 'FP', 'FN', 'F', 'F(%)', 'P+(%)', 'Se(%)', 'F1(%)'])
     comparison_df_119 = pd.DataFrame(columns=['nbofbeats', 'FP', 'FN', 'F', 'F(%)', 'P+(%)', 'Se(%)', 'F1(%)'])
     if os.path.exists(f'output/perf/{algorithm}_mit-bih-arrhythmia_{tolerance}.csv'):
@@ -369,6 +406,7 @@ elif application == 'Noise robustness':
     st.write(comparison_df_118)
     st.write(comparison_df_119)
 
+    # graphs of performances
     SNR_list = ['_6', '00', '06', '12', '18', '24']
     results_F1 = pd.DataFrame(columns=SNR_list, index=algorithms_list)
     results_Fp = pd.DataFrame(columns=SNR_list, index=algorithms_list)

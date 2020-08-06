@@ -1,16 +1,23 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+"""This script provides lists of available databases, of their records and their channels, their sampling frequency and
+methods to read files from Physionet."""
+
 import wfdb
 import pandas as pd
-from typing import  Generator, Dict, Tuple
+import numpy
+from typing import Generator, Dict, Tuple
+
 data_path = 'data'
 
-# list all dataset
+# list of dataset
 datasets_list = ['mit-bih-arrhythmia', 'mit-bih-noise-stress-test-e24', 'mit-bih-noise-stress-test-e18',
                  'mit-bih-noise-stress-test-e12', 'mit-bih-noise-stress-test-e06', 'mit-bih-noise-stress-test-e00',
                  'mit-bih-noise-stress-test-e_6', 'european-stt', 'mit-bih-supraventricular-arrhythmia',
                  'mit-bih-long-term-ecg']
 
 # MIT-BIH Arrhythmia Database
-# records
+# records and their channels
 mit_bih_arrhythmia = {
     '100': ['MLII', 'V5'],
     '101': ['MLII', 'V1'],
@@ -63,8 +70,13 @@ mit_bih_arrhythmia = {
 }
 
 
-# load data
-def read_mit_bih_arrhythmia() -> Generator[Tuple[int, Dict], None, None]:
+def read_mit_bih_arrhythmia() -> Generator[Tuple[str, Dict[str, numpy.ndarray]], None, None]:
+    """
+    read records from MIT BIH Arrhythmia Database.
+
+    :return: ID and values of sampled signals for each record
+    :rtype: tuple(str, dict(str, ndarray))
+    """
     records_list = pd.read_csv(f'{data_path}/mit-bih-arrhythmia-database/RECORDS', names=['id'])
     for record_id in records_list['id']:
         record = wfdb.rdrecord(f'{data_path}/mit-bih-arrhythmia-database/{record_id}')
@@ -75,7 +87,7 @@ def read_mit_bih_arrhythmia() -> Generator[Tuple[int, Dict], None, None]:
 
 
 # MIT-BIH Noise stress test Database
-# records
+# records and their channels
 mit_bih_noise_stress_test_e24 = {
     '118e24': ['MLII', 'V1'],
     '119e24': ['MLII', 'V1']
@@ -107,8 +119,13 @@ mit_bih_noise_stress_test_e_6 = {
 }
 
 
-# load data
-def read_mit_bih_noise_e24() -> Generator[Tuple[int, Dict], None, None]:
+def read_mit_bih_noise_e24() -> Generator[Tuple[str, Dict[str, numpy.ndarray]], None, None]:
+    """
+    read records with SNR 24dB from MIT BIH Noise Stress Test Database.
+
+    :return: ID and values of sampled signals for each record
+    :rtype: tuple(str, dict(str, ndarray))
+    """
     rec_list = pd.read_csv(f'{data_path}/mit-bih-noise-stress-test-database/RECORDS', names=['id'])
     records_list = [record_id for record_id in rec_list['id'] if record_id.find('e24') != -1]
     for record_id in records_list:
@@ -119,7 +136,13 @@ def read_mit_bih_noise_e24() -> Generator[Tuple[int, Dict], None, None]:
         }
 
 
-def read_mit_bih_noise_e18() -> Generator[Tuple[int, Dict], None, None]:
+def read_mit_bih_noise_e18() -> Generator[Tuple[str, Dict[str, numpy.ndarray]], None, None]:
+    """
+    read records with SNR 18dB from MIT BIH Noise Stress Test Database.
+
+    :return: ID and values of sampled signals for each record
+    :rtype: tuple(str, dict(str, ndarray))
+    """
     rec_list = pd.read_csv(f'{data_path}/mit-bih-noise-stress-test-database/RECORDS', names=['id'])
     records_list = [record_id for record_id in rec_list['id'] if record_id.find('e18') != -1]
     for record_id in records_list:
@@ -130,7 +153,13 @@ def read_mit_bih_noise_e18() -> Generator[Tuple[int, Dict], None, None]:
         }
 
 
-def read_mit_bih_noise_e12() -> Generator[Tuple[int, Dict], None, None]:
+def read_mit_bih_noise_e12() -> Generator[Tuple[str, Dict[str, numpy.ndarray]], None, None]:
+    """
+    read records with SNR 12dB from MIT BIH Noise Stress Test Database.
+
+    :return: ID and values of sampled signals for each record
+    :rtype: tuple(str, dict(str, ndarray))
+    """
     rec_list = pd.read_csv(f'{data_path}/mit-bih-noise-stress-test-database/RECORDS', names=['id'])
     records_list = [record_id for record_id in rec_list['id'] if record_id.find('e12') != -1]
     for record_id in records_list:
@@ -141,7 +170,13 @@ def read_mit_bih_noise_e12() -> Generator[Tuple[int, Dict], None, None]:
         }
 
 
-def read_mit_bih_noise_e06() -> Generator[Tuple[int, Dict], None, None]:
+def read_mit_bih_noise_e06() -> Generator[Tuple[str, Dict[str, numpy.ndarray]], None, None]:
+    """
+    read records with SNR 6dB from MIT BIH Noise Stress Test Database
+
+    :return: ID and values of sampled signals for each record
+    :rtype: tuple(str, dict(str, ndarray))
+    """
     rec_list = pd.read_csv(f'{data_path}/mit-bih-noise-stress-test-database/RECORDS', names=['id'])
     records_list = [record_id for record_id in rec_list['id'] if record_id.find('e06') != -1]
     for record_id in records_list:
@@ -152,7 +187,13 @@ def read_mit_bih_noise_e06() -> Generator[Tuple[int, Dict], None, None]:
         }
 
 
-def read_mit_bih_noise_e00() -> Generator[Tuple[int, Dict], None, None]:
+def read_mit_bih_noise_e00() -> Generator[Tuple[str, Dict[str, numpy.ndarray]], None, None]:
+    """
+    read records with SNR 0dB from MIT BIH Noise Stress Test Database.
+
+    :return: ID and values of sampled signals for each record
+    :rtype: tuple(str, dict(str, ndarray))
+    """
     rec_list = pd.read_csv(f'{data_path}/mit-bih-noise-stress-test-database/RECORDS', names=['id'])
     records_list = [record_id for record_id in rec_list['id'] if record_id.find('e00') != -1]
     for record_id in records_list:
@@ -163,7 +204,13 @@ def read_mit_bih_noise_e00() -> Generator[Tuple[int, Dict], None, None]:
         }
 
 
-def read_mit_bih_noise_e_6() -> Generator[Tuple[int, Dict], None, None]:
+def read_mit_bih_noise_e_6() -> Generator[Tuple[str, Dict[str, numpy.ndarray]], None, None]:
+    """
+    read records with SNR -6dB from MIT BIH Noise Stress Test Database.
+
+    :return: ID and values of sampled signals for each record
+    :rtype: tuple(str, dict(str, ndarray))
+    """
     rec_list = pd.read_csv(f'{data_path}/mit-bih-noise-stress-test-database/RECORDS', names=['id'])
     records_list = [record_id for record_id in rec_list['id'] if record_id.find('e_6') != -1]
     for record_id in records_list:
@@ -175,7 +222,7 @@ def read_mit_bih_noise_e_6() -> Generator[Tuple[int, Dict], None, None]:
 
 
 # European ST-T Database
-# records
+# records and their channels
 european_stt = {
     'e0103': ['V4', 'MLIII'],
     'e0104': ['MLIII', 'V4'],
@@ -270,8 +317,13 @@ european_stt = {
 }
 
 
-# load data
-def read_european_stt() -> Generator[Tuple[int, Dict], None, None]:
+def read_european_stt() -> Generator[Tuple[str, Dict[str, numpy.ndarray]], None, None]:
+    """
+    read records from European ST-T Database.
+
+    :return: ID and values of sampled signals for each record
+    :rtype: tuple(str, dict(str, ndarray))
+    """
     records_list = pd.read_csv(f'{data_path}/european-stt-database/RECORDS', names=['id'])
     for record_id in records_list['id']:
         record = wfdb.rdrecord(f'{data_path}/european-stt-database/{record_id}')
@@ -282,7 +334,7 @@ def read_european_stt() -> Generator[Tuple[int, Dict], None, None]:
 
 
 # MIT-BIH Supraventricular Arrhythmia Database
-# records
+# records and their channels
 mit_bih_supraventricular_arrhythmia = {
     '800': ['ECG1', 'ECG2'],
     '801': ['ECG1', 'ECG2'],
@@ -365,8 +417,13 @@ mit_bih_supraventricular_arrhythmia = {
 }
 
 
-# load data
-def read_mit_bih_supraventricular_arrhythmia() -> Generator[Tuple[int, Dict], None, None]:
+def read_mit_bih_supraventricular_arrhythmia() -> Generator[Tuple[str, Dict[str, numpy.ndarray]], None, None]:
+    """
+    read records from MIT BIH Supraventricular Arrhythmia Database.
+
+    :return: ID and values of sampled signals for each record
+    :rtype: tuple(str, dict(str, ndarray))
+    """
     records_list = pd.read_csv(f'{data_path}/mit-bih-supraventricular-arrhythmia-database/RECORDS', names=['id'])
     for record_id in records_list['id']:
         record = wfdb.rdrecord(f'{data_path}/mit-bih-supraventricular-arrhythmia-database/{record_id}')
@@ -377,7 +434,7 @@ def read_mit_bih_supraventricular_arrhythmia() -> Generator[Tuple[int, Dict], No
 
 
 # MIT-BIH Long Term Database
-# records
+# records and their channels
 mit_bih_long_term = {
     '14046': ['ECG1', 'ECG2'],
     '14134': ['ECG1', 'ECG2'],
@@ -389,8 +446,13 @@ mit_bih_long_term = {
 }
 
 
-# load data
-def read_mit_bih_long_term() -> Generator[Tuple[int, Dict], None, None]:
+def read_mit_bih_long_term() -> Generator[Tuple[str, Dict[str, numpy.ndarray]], None, None]:
+    """
+    read records from MIT BIH Long Term ECG Database.
+
+    :return: ID and values of sampled signals for each record
+    :rtype: tuple(str, dict(str, ndarray))
+    """
     records_list = pd.read_csv(f'{data_path}/mit-bih-long-term-ecg-database/RECORDS', names=['id'])
     for record_id in records_list['id']:
         record = wfdb.rdrecord(f'{data_path}/mit-bih-long-term-ecg-database/{record_id}')
@@ -400,7 +462,7 @@ def read_mit_bih_long_term() -> Generator[Tuple[int, Dict], None, None]:
         yield record_id, record_sigs
 
 
-# generator for reading records
+# generator for records' readers
 dataset_generators = {
     'mit-bih-arrhythmia': read_mit_bih_arrhythmia(),
     'mit-bih-noise-stress-test-e24': read_mit_bih_noise_e24(),
@@ -414,7 +476,8 @@ dataset_generators = {
     'mit-bih-long-term-ecg': read_mit_bih_long_term()
 }
 
-#generator for names of records and their channels
+
+# generator to get names of records and their channels
 records = {
     'mit-bih-arrhythmia': mit_bih_arrhythmia,
     'mit-bih-noise-stress-test-e24': mit_bih_noise_stress_test_e24,
@@ -428,7 +491,7 @@ records = {
     'mit-bih-long-term-ecg': mit_bih_long_term
 }
 
-#generator for value of sampling frequence
+# generator for value of signals' sampling frequency
 sampling_frequency = {
     'mit-bih-arrhythmia': 360,
     'mit-bih-noise-stress-test-e24': 360,
